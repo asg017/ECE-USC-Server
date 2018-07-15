@@ -71,6 +71,55 @@ class Message():
             'message':self.message
         }
 
+class TemplateType(Enum):
+    GENERIC = 'generic'
+    LIST = 'list'
+    BUTTON = 'button'
+
+class TemplateMessage(Message):
+    def __init__(self, psid=None, template_type=TemplateType.GENERIC, **kwargs):
+        super().__init__(psid=psid, **kwargs)
+        self.message = {
+            'attachment': { 
+                'type': 'template',
+                'payload': {
+                    'template_type': template_type.value,
+                }
+            }
+        }
+
+class GenericTemplate(TemplateMessage):
+    def __init__(self, psid=None, elements=[], buttons=[]):
+        super().__init__(psid, template_type=TemplateType.GENERIC, **kwargs)
+        self.payload = self.message.get('attachment').get('payload')
+
+    def add_button(self, button=None):
+        
+
+class ButtonType(Enum):
+    POSTBACK = 'postback'
+    URL = 'web_url'
+
+class Button():
+    def __init__(self, button_type=ButtonType.POSTBACK, title=''):
+        self.button = {
+            'type':button_type.value,
+            'title': title
+        }
+
+    def serialize(self):
+        return json.dumps(self.button)
+
+class UrlButton(Button):
+    def __init__(self, title='', url='', **kwargs):
+        super().__init__(self, button_type=ButtonType.URL, title=title, **kwargs)
+        self.button['url'] = url
+
+class PostbackButton(Button):
+    def __init__(self, title='', payload='', **kwargs):
+        super().__init__(self, button_type=ButtonType.POSTBACK, title=title, **kwargs)
+        self.button['payload'] = payload
+
 class TextMessage(Message):
     def __init__(self, text='', psid=None, **kwargs):
         super().__init__(psid=psid, **kwargs)
